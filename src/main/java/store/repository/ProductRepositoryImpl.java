@@ -16,20 +16,25 @@ public class ProductRepositoryImpl implements ProductRepository {
         List<Product> products = FileReader.convertTo(path, Product::from);
         products.forEach(product -> {
             this.store.add(product);
-            if (product.isPromotionProduct() && !hasNotNormalProduct(products, product)) {
+            if (product.isPromotionProduct() && !hasNotNormalProduct(products, product.name())) {
                 this.store.add(Product.createEmptyProduct(product));
             }
         });
     }
 
-    private static boolean hasNotNormalProduct(List<Product> products, Product compareProduct) {
+    private static boolean hasNotNormalProduct(List<Product> products, String productName) {
         return products.stream()
                 .filter(product -> !product.isPromotionProduct())
-                .anyMatch(product -> product.equalTo(compareProduct));
+                .anyMatch(product -> product.equalTo(productName));
     }
 
     @Override
     public List<Product> getAllProducts() {
         return new ArrayList<>(store);
+    }
+
+    @Override
+    public boolean existsProduct(String name) {
+        return store.stream().anyMatch(product -> product.equalTo(name));
     }
 }

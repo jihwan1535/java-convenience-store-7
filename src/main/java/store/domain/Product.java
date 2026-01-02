@@ -30,8 +30,8 @@ public class Product {
         return !promotion.equals(NOT_PROMOTION);
     }
 
-    public boolean equalTo(Product other) {
-        return price == other.price && name.equals(other.name);
+    public boolean equalTo(String otherName) {
+        return otherName.equals(this.name);
     }
 
     public String name() {
