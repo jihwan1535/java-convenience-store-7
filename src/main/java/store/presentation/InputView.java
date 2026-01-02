@@ -18,4 +18,10 @@ public class InputView {
                 })
                 .toList();
     }
+
+    public InputMenu readMembershipSale() {
+        System.out.println("멤버십 할인을 받으시겠습니까? (Y/N)");
+        String input = Console.readLine();
+        return InputMenu.of(input);
+    }
 }

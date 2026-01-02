@@ -3,6 +3,7 @@ package store;
 import java.util.List;
 import store.application.PurchaseProduct;
 import store.domain.Product;
+import store.presentation.InputMenu;
 import store.presentation.InputView;
 import store.presentation.OutputView;
 import store.util.FileReader;
@@ -23,6 +24,8 @@ public class StoreController {
         // TODO: 프로모션 체크
         // TODO: 일반 수량 전환 체크
         // TODO: 멤버십 할인 체크
+        InputMenu membershipMenu = inputView.readMembershipSale();
+        
         // TODO: 영수증 출력 체크
         // TODO: 재구매 체크
     }
