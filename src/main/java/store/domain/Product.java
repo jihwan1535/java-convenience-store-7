@@ -49,4 +49,8 @@ public class Product {
     public int stock() {
         return stock;
     }
+
+    public int countPromotionSale(Promotion promotion) {
+        return promotion.countSaleStock(stock);
+    }
 }

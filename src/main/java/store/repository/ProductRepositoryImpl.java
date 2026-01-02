@@ -2,6 +2,7 @@ package store.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import store.domain.Product;
 import store.domain.ProductRepository;
 import store.util.FileReader;
@@ -36,5 +37,13 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public boolean existsProduct(String name) {
         return store.stream().anyMatch(product -> product.equalTo(name));
+    }
+
+    @Override
+    public Optional<Product> findPromotionProduct(String name) {
+        return store.stream()
+                .filter(Product::isPromotionProduct)
+                .filter(product -> product.equalTo(name))
+                .findFirst();
     }
 }
