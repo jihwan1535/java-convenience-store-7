@@ -35,8 +35,13 @@ public class InputView {
         return InputMenu.of(Console.readLine());
     }
 
-    public boolean readCanNotSaleCheck(String name, int count) {
-        System.out.printf("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)%n", name, count);
+    public boolean readCanNotSaleCheck(String name, int quantity) {
+        System.out.printf("현재 %s %d개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)%n", name, quantity);
+        return InputMenu.of(Console.readLine()) == InputMenu.Y;
+    }
+
+    public boolean readAdditionalQuantity(String name, int quantity) {
+        System.out.printf("현재 %s은(는) %d개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)%n", name, quantity);
         return InputMenu.of(Console.readLine()) == InputMenu.Y;
     }
 }

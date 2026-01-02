@@ -36,6 +36,7 @@ public class StoreController {
                 if (!checkCanPromotionSale(purchaseProduct)) {
                     continue;
                 }
+                int freeQuantity = calculateFreeQuantity(purchaseProduct);
             }
             // TODO: 상품 구매 기능
             // TODO: 일반 수량 전환 체크
@@ -47,6 +48,22 @@ public class StoreController {
                 break;
             }
         }
+    }
+
+    private int calculateFreeQuantity(PurchaseProduct purchaseProduct) {
+        return productRepository.findPromotionProduct(purchaseProduct.name())
+                .map(promotionProduct -> {
+                    Promotion promotion = promotionRepository.findPromotion(promotionProduct.promotion());
+                    boolean canGetAdditionalQuantity = promotion.canGetAdditionalQuantity(purchaseProduct.quantity());
+                    if (!canGetAdditionalQuantity) {
+                        return 0;
+                    }
+                    if (inputView.readAdditionalQuantity(purchaseProduct.name(), promotion.get())) {
+                        return promotion.get();
+                    }
+                    return 0;
+                })
+                .orElse(0);
     }
 
     private boolean checkCanPromotionSale(PurchaseProduct purchaseProduct) {

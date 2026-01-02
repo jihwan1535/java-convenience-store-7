@@ -24,4 +24,9 @@ public record Promotion(String name, int buy, int get, LocalDate start, LocalDat
         int saleBundle = stock / totalCount();
         return totalCount() * saleBundle;
     }
+
+    public boolean canGetAdditionalQuantity(int purchaseQuantity) {
+        int remainingQuantity = purchaseQuantity % totalCount();
+        return remainingQuantity == buy;
+    }
 }
