@@ -3,21 +3,22 @@ package store;
 import java.util.List;
 import store.application.PurchaseProduct;
 import store.domain.Product;
+import store.domain.ProductRepository;
 import store.presentation.InputMenu;
 import store.presentation.InputView;
 import store.presentation.OutputView;
-import store.util.FileReader;
+import store.repository.ProductRepositoryImpl;
 
 public class StoreController {
 
     InputView inputView = new InputView();
     OutputView outputView = new OutputView();
+    ProductRepository productRepository = new ProductRepositoryImpl();
 
     public void run() {
         while (true) {
             outputView.printIntro();
-            String path = "src/main/resources/products.md";
-            List<Product> products = FileReader.convertTo(path, Product::from);
+            List<Product> products = productRepository.getAllProducts();
             outputView.printProducts(products);
 
             List<PurchaseProduct> purchaseProducts = inputView.readPurchaseProduct();

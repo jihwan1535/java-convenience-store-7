@@ -22,8 +22,16 @@ public class Product {
         return new Product(productData[0], price, stock, productData[3]);
     }
 
+    public static Product createEmptyProduct(Product product) {
+        return new Product(product.name, product.price, 0, NOT_PROMOTION);
+    }
+
     public boolean isPromotionProduct() {
         return !promotion.equals(NOT_PROMOTION);
+    }
+
+    public boolean equalTo(Product other) {
+        return price == other.price && name.equals(other.name);
     }
 
     public String name() {
