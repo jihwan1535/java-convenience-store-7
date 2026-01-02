@@ -40,7 +40,7 @@ public class InputView {
         return InputMenu.of(Console.readLine()) == InputMenu.Y;
     }
 
-    public boolean readAdditionalQuantity(String name, int quantity) {
+    public boolean readAdditionalStatus(String name, int quantity) {
         System.out.printf("현재 %s은(는) %d개를 무료로 더 받을 수 있습니다. 추가하시겠습니까? (Y/N)%n", name, quantity);
         return InputMenu.of(Console.readLine()) == InputMenu.Y;
     }

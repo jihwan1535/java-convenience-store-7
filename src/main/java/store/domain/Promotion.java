@@ -27,6 +27,6 @@ public record Promotion(String name, int buy, int get, LocalDate start, LocalDat
 
     public boolean canGetAdditionalQuantity(int purchaseQuantity) {
         int remainingQuantity = purchaseQuantity % totalCount();
-        return remainingQuantity == buy;
+        return remainingQuantity >= buy;
     }
 }

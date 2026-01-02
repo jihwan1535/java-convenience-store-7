@@ -1,5 +1,8 @@
 package store.domain;
 
+import store.exception.CustomException;
+import store.exception.ExceptionMessage;
+
 public class Product {
 
     private static final String NOT_PROMOTION = "null";
@@ -52,5 +55,16 @@ public class Product {
 
     public int countPromotionSale(Promotion promotion) {
         return promotion.countSaleStock(stock);
+    }
+
+    public void purchase(int purchaseQuantity) {
+        if (stock < purchaseQuantity) {
+            throw new CustomException(ExceptionMessage.OUT_OF_STOCK);
+        }
+        this.stock = stock - purchaseQuantity;
+    }
+
+    public void purchaseAll() {
+        this.stock = 0;
     }
 }

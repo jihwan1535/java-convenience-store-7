@@ -46,4 +46,26 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .filter(product -> product.equalTo(name))
                 .findFirst();
     }
+
+    @Override
+    public int countTotalStock(String name) {
+        return store.stream()
+                .filter(product -> product.equalTo(name))
+                .map(Product::stock)
+                .reduce(0, Integer::sum);
+    }
+
+    @Override
+    public Product findProduct(String name) {
+        return store.stream()
+                .filter(product -> !product.isPromotionProduct())
+                .filter(product -> product.equalTo(name))
+                .findFirst()
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public int countPromotionProductStock(String name) {
+        return findPromotionProduct(name).map(Product::stock).orElseThrow(IllegalStateException::new);
+    }
 }

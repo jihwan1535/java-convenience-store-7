@@ -9,4 +9,10 @@ public interface ProductRepository {
     boolean existsProduct(String name);
 
     Optional<Product> findPromotionProduct(String name);
+
+    int countTotalStock(String name);
+
+    Product findProduct(String name);
+
+    int countPromotionProductStock(String name);
 }
