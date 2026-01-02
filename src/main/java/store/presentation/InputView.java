@@ -21,7 +21,11 @@ public class InputView {
 
     public InputMenu readMembershipSale() {
         System.out.println("멤버십 할인을 받으시겠습니까? (Y/N)");
-        String input = Console.readLine();
-        return InputMenu.of(input);
+        return InputMenu.of(Console.readLine());
+    }
+
+    public InputMenu readRepurchase() {
+        System.out.println("감사합니다. 구매하고 싶은 다른 상품이 있나요? (Y/N)");
+        return InputMenu.of(Console.readLine());
     }
 }
