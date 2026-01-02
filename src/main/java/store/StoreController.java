@@ -1,8 +1,11 @@
 package store;
 
+import static store.util.ExceptionHandler.handle;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import store.application.PurchaseProduct;
 import store.domain.Product;
 import store.domain.ProductRepository;
@@ -25,38 +28,41 @@ public class StoreController {
     private final PromotionRepository promotionRepository = new PromotionRepositoryImpl();
 
     public void run() {
-        while (true) {
+        boolean running = true;
+        while (running) {
             outputView.printIntro();
             List<Product> products = productRepository.getAllProducts();
             outputView.printProducts(products);
 
             List<PurchaseResult> purchaseResults = new ArrayList<>();
-            List<PurchaseProduct> purchaseProducts = inputView.readPurchaseProduct();
-            for (PurchaseProduct purchaseProduct : purchaseProducts) {
-                int sum = productRepository.countTotalStock(purchaseProduct.name());
-                if (!productRepository.existsProduct(purchaseProduct.name())) {
-                    throw new CustomException(ExceptionMessage.NOT_FOUND_PRODUCT);
-                }
-                if (purchaseProduct.quantity() > sum) {
-                    throw new CustomException(ExceptionMessage.OUT_OF_STOCK);
-                }
+            handle(() -> purchaseProducts(purchaseResults), processError());
 
-                int freeQuantity = calculateFreeQuantity(purchaseProduct);
-                int purchaseQuantity = purchaseProduct.quantity() + freeQuantity;
-                if (!checkCanPromotionSale(purchaseProduct, purchaseQuantity)) {
-                    continue;
-                }
-                PurchaseResult purchaseResult = purchase(purchaseProduct, purchaseQuantity);
-                purchaseResults.add(purchaseResult);
-            }
-
-            InputMenu membershipMenu = inputView.readMembershipSale();
+            InputMenu membershipMenu = handle(inputView::readMembershipSale, processError());
+            // 멤버십 적용
 
             // TODO: 영수증 출력 체크
-            InputMenu repurchaseMenu = inputView.readRepurchase();
-            if (repurchaseMenu == InputMenu.N) {
-                break;
+            running = handle(inputView::readRepurchase, processError());
+        }
+    }
+
+    private void purchaseProducts(List<PurchaseResult> purchaseResults) {
+        List<PurchaseProduct> purchaseProducts = inputView.readPurchaseProduct();
+        for (PurchaseProduct purchaseProduct : purchaseProducts) {
+            int totalStockQuantity = productRepository.countTotalStock(purchaseProduct.name());
+            if (!productRepository.existsProduct(purchaseProduct.name())) {
+                throw new CustomException(ExceptionMessage.NOT_FOUND_PRODUCT);
             }
+            if (purchaseProduct.quantity() > totalStockQuantity) {
+                throw new CustomException(ExceptionMessage.OUT_OF_STOCK);
+            }
+
+            int freeQuantity = handle(() -> calculateFreeQuantity(purchaseProduct), processError());
+            int purchaseQuantity = purchaseProduct.quantity() + freeQuantity;
+            if (!handle(() -> checkCanPromotionSale(purchaseProduct, purchaseQuantity), processError())) {
+                continue;
+            }
+            PurchaseResult purchaseResult = purchase(purchaseProduct, purchaseQuantity);
+            purchaseResults.add(purchaseResult);
         }
     }
 
@@ -114,5 +120,9 @@ public class StoreController {
             return true;
         }
         return inputView.readCanNotSaleCheck(purchaseProduct.name(), notAppliedSaleCount);
+    }
+
+    private Consumer<IllegalArgumentException> processError() {
+        return (e) -> outputView.printError(e.getMessage());
     }
 }

@@ -40,4 +40,8 @@ public class OutputView {
             printNormalProduct(product);
         });
     }
+
+    public void printError(String message) {
+        System.out.println(message);
+    }
 }
