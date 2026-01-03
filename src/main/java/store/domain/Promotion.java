@@ -20,7 +20,10 @@ public record Promotion(String name, int buy, int get, LocalDate start, LocalDat
         return buy + get;
     }
 
-    public int countSaleStock(int stock) {
+    public int countSaleStock(int stock, LocalDate today) {
+        if (isInActive(today)) {
+            return 0;
+        }
         int saleBundle = stock / totalCount();
         return totalCount() * saleBundle;
     }
@@ -28,5 +31,9 @@ public record Promotion(String name, int buy, int get, LocalDate start, LocalDat
     public boolean canGetAdditionalQuantity(int purchaseQuantity) {
         int remainingQuantity = purchaseQuantity % totalCount();
         return remainingQuantity >= buy;
+    }
+
+    public boolean isInActive(LocalDate today) {
+        return today.isBefore(start) || today.isAfter(end);
     }
 }

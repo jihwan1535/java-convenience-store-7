@@ -1,5 +1,6 @@
 package store.domain;
 
+import camp.nextstep.edu.missionutils.DateTimes;
 import store.exception.CustomException;
 import store.exception.ExceptionMessage;
 
@@ -54,7 +55,7 @@ public class Product {
     }
 
     public int countPromotionSale(Promotion promotion) {
-        return promotion.countSaleStock(stock);
+        return promotion.countSaleStock(stock, DateTimes.now().toLocalDate());
     }
 
     public void purchase(int purchaseQuantity) {

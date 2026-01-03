@@ -26,10 +26,10 @@ public class InputView {
         }
     }
 
-    public InputMenu readMembershipSale() {
+    public boolean readMembershipSale() {
         System.out.println();
         System.out.println("멤버십 할인을 받으시겠습니까? (Y/N)");
-        return InputMenu.of(Console.readLine());
+        return InputMenu.of(Console.readLine()) == InputMenu.Y;
     }
 
     public boolean readRepurchase() {

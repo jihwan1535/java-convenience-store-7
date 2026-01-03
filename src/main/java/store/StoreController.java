@@ -2,11 +2,13 @@ package store;
 
 import static store.util.ExceptionHandler.handle;
 
+import camp.nextstep.edu.missionutils.DateTimes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import store.application.PurchaseProduct;
+import store.domain.Bill;
 import store.domain.Product;
 import store.domain.ProductRepository;
 import store.domain.Promotion;
@@ -14,7 +16,6 @@ import store.domain.PromotionRepository;
 import store.domain.PurchaseResult;
 import store.exception.CustomException;
 import store.exception.ExceptionMessage;
-import store.presentation.InputMenu;
 import store.presentation.InputView;
 import store.presentation.OutputView;
 import store.repository.ProductRepositoryImpl;
@@ -37,10 +38,10 @@ public class StoreController {
             List<PurchaseResult> purchaseResults = new ArrayList<>();
             handle(() -> purchaseProducts(purchaseResults), processError());
 
-            InputMenu membershipMenu = handle(inputView::readMembershipSale, processError());
-            // 멤버십 적용
+            boolean membership = handle(inputView::readMembershipSale, processError());
+            Bill bill = Bill.of(purchaseResults, membership);
+            outputView.printPurchaseResult(bill);
 
-            // TODO: 영수증 출력 체크
             running = handle(inputView::readRepurchase, processError());
         }
     }
@@ -69,21 +70,24 @@ public class StoreController {
     private PurchaseResult purchase(PurchaseProduct purchaseProduct, int purchaseQuantity) {
         return productRepository.findPromotionProduct(purchaseProduct.name())
                 .map(promotionProduct -> {
-                    int remainingQuantity = purchaseProduct.quantity() - promotionProduct.stock();
-                    if (remainingQuantity >= 0) {
-                        promotionProduct.purchase(purchaseProduct.quantity());
-                        return PurchaseResult.of(promotionProduct, purchaseQuantity, 0);
+                    Promotion promotion = promotionRepository.findPromotion(promotionProduct.promotion());
+                    int remainingQuantity = purchaseQuantity - promotionProduct.stock();
+                    if (remainingQuantity < 0) {
+                        promotionProduct.purchase(purchaseQuantity);
+                        int giftQuantity = promotion.countSaleStock(purchaseQuantity, DateTimes.now().toLocalDate());
+                        return PurchaseResult.of(promotionProduct, purchaseQuantity, 0, giftQuantity);
                     }
-                    int promotionProductStockQuantity = promotionProduct.stock();
+                    int promotionProductStock = promotionProduct.stock();
                     promotionProduct.purchaseAll();
                     Product normalProduct = productRepository.findProduct(purchaseProduct.name());
                     normalProduct.purchase(remainingQuantity);
-                    return PurchaseResult.of(normalProduct, promotionProductStockQuantity, remainingQuantity);
+                    int giftQuantity = promotion.countSaleStock(promotionProductStock, DateTimes.now().toLocalDate());
+                    return PurchaseResult.of(normalProduct, promotionProductStock, remainingQuantity, giftQuantity);
                 })
                 .orElseGet(() -> {
                     Product normalProduct = productRepository.findProduct(purchaseProduct.name());
                     normalProduct.purchase(purchaseQuantity);
-                    return PurchaseResult.of(normalProduct, 0, purchaseQuantity);
+                    return PurchaseResult.of(normalProduct, 0, purchaseQuantity, 0);
                 });
     }
 
@@ -114,6 +118,9 @@ public class StoreController {
 
         Product promotionProduct = optionalProduct.get();
         Promotion promotion = promotionRepository.findPromotion(promotionProduct.promotion());
+        if (promotion.isInActive(DateTimes.now().toLocalDate())) {
+            return true;
+        }
         int notAppliedSaleCount = purchaseQuantity - promotionProduct.countPromotionSale(promotion);
 
         if (notAppliedSaleCount <= 0) {
